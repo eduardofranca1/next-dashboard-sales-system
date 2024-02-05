@@ -1,16 +1,39 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
+  Grid,
   InputAdornment,
+  Skeleton,
   TextField,
   Typography,
 } from "@mui/material";
 import { Refresh, Search } from "@mui/icons-material";
+import { Order } from "@/types/Order";
+import { api } from "@/libs/api";
+import { OrderItem } from "@/components/OrderItem";
 
 const Page = () => {
   const [searchInput, setSearchInput] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  const getOrders = async () => {
+    setSearchInput("");
+    setOrders([]);
+    setLoading(true);
+
+    const result = await api.getOrders();
+
+    setOrders(result);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    getOrders();
+  }, []);
 
   const handleSearchInput = () => {};
 
@@ -18,7 +41,7 @@ const Page = () => {
 
   return (
     <Box sx={{ my: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+      <Box sx={{ mb: 3, display: "flex", justifyContent: "space-between" }}>
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Typography
             component={"h5"}
@@ -27,18 +50,22 @@ const Page = () => {
           >
             Requests
           </Typography>
-          <Button
-            size="small"
-            sx={{ justifyContent: { xs: "flex-start", md: "center" } }}
-          >
-            <Refresh />
-            <Typography
-              component={"div"}
-              sx={{ color: "#555", display: { xs: "none", sm: "block" } }}
+          {loading && <CircularProgress size={24} />}
+          {!loading && (
+            <Button
+              onClick={getOrders}
+              size="small"
+              sx={{ justifyContent: { xs: "flex-start", md: "center" } }}
             >
-              Atualizar
-            </Typography>
-          </Button>
+              <Refresh />
+              <Typography
+                component={"div"}
+                sx={{ color: "#555", display: { xs: "none", sm: "block" } }}
+              >
+                Atualizar
+              </Typography>
+            </Button>
+          )}
         </Box>
         <TextField
           value={searchInput}
@@ -46,6 +73,7 @@ const Page = () => {
           onKeyUp={handleSearchKey}
           placeholder="Search a request"
           variant="standard"
+          disabled={loading}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -55,6 +83,34 @@ const Page = () => {
           }}
         />
       </Box>
+
+      <Grid container spacing={3} columns={{ xs: 1, sm: 2, md: 4 }}>
+        {loading && (
+          <>
+            <Grid item xs={1}>
+              <Skeleton variant="rectangular" height={220} />
+            </Grid>
+            <Grid item xs={1}>
+              <Skeleton variant="rectangular" height={220} />
+            </Grid>
+            <Grid item xs={1}>
+              <Skeleton variant="rectangular" height={220} />
+            </Grid>
+            <Grid item xs={1}>
+              <Skeleton variant="rectangular" height={220} />
+            </Grid>
+            <Grid item xs={1}>
+              <Skeleton variant="rectangular" height={220} />
+            </Grid>
+          </>
+        )}
+        {!loading &&
+          orders.map((item, index) => (
+            <Grid key={index} item xs={1}>
+              <OrderItem item={item} />
+            </Grid>
+          ))}
+      </Grid>
     </Box>
   );
 };

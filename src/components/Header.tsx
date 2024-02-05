@@ -49,13 +49,13 @@ export const Header = () => {
             </Link>
           </Typography>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
-            <Link href={"/pedidos"} style={{ textDecoration: "none" }}>
+            <Link href={"/requests"} style={{ textDecoration: "none" }}>
               <Button sx={{ color: "#FFF" }}>Requests</Button>
             </Link>
-            <Link href={"/produtos"} style={{ textDecoration: "none" }}>
+            <Link href={"/products"} style={{ textDecoration: "none" }}>
               <Button sx={{ color: "#FFF" }}>Products</Button>
             </Link>
-            <Link href={"/categorias"} style={{ textDecoration: "none" }}>
+            <Link href={"/categories"} style={{ textDecoration: "none" }}>
               <Button sx={{ color: "#FFF" }}>Categories</Button>
             </Link>
             <Button onClick={handleLogout} sx={{ color: "#FFF" }}>
