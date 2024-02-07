@@ -12,9 +12,10 @@ import {
 type Props = {
   item: Order;
   onChangeStatus: (id: number, newStatus: OrderStatus) => void;
+  onPrint: (order: Order) => void;
 };
 
-export const OrderItem = ({ item, onChangeStatus }: Props) => {
+export const OrderItem = ({ item, onChangeStatus, onPrint }: Props) => {
   const getStatusBackground = (status: OrderStatus) => {
     const statuses = {
       preparing: "#2787BA",
@@ -26,6 +27,10 @@ export const OrderItem = ({ item, onChangeStatus }: Props) => {
 
   const handleStatusChange = (event: SelectChangeEvent) => {
     onChangeStatus(item.id, event.target.value as OrderStatus);
+  };
+
+  const handlePrintButton = () => {
+    onPrint(item);
   };
 
   return (
@@ -50,7 +55,11 @@ export const OrderItem = ({ item, onChangeStatus }: Props) => {
         <Box>
           <Typography component={"p"}>{dateFormat(item.orderDate)}</Typography>
           <Typography component={"p"}>{item.userName}</Typography>
-          <Button size="small" sx={{ color: "#FFF", p: 0 }}>
+          <Button
+            onClick={handlePrintButton}
+            size="small"
+            sx={{ color: "#FFF", p: 0 }}
+          >
             IMRPIMIR
           </Button>
         </Box>
