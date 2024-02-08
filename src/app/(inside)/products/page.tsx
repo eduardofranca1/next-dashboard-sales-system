@@ -1,9 +1,14 @@
 "use client";
-import { KeyboardEvent, useEffect, useState } from "react";
+import { FormEvent, KeyboardEvent, useEffect, useState } from "react";
 import {
   Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Grid,
   InputAdornment,
   Skeleton,
@@ -20,11 +25,85 @@ import { Order, OrderStatus } from "@/types/Order";
 import { api } from "@/libs/api";
 import { OrderItem } from "@/components/OrderItem";
 import { dateFormat } from "@/libs/dateFormat";
+import { Product } from "@/types/Product";
+import { Catergory } from "@/types/Category";
+import { ProductTableSkeleton } from "@/components/ProductTableSkeleton";
+import { ProductTableItem } from "@/components/ProductTableItem";
+import { ProductEditModal } from "@/components/ProductEditModal";
 
 const Page = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Catergory[]>([]);
 
-  const handleNewProduct = () => {};
+  // states to delete
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
+  const [productToDelete, setProductToDelete] = useState<Product>();
+  const [loadingDelete, setLoadingDelete] = useState<boolean>(false);
+
+  // state to edit
+  const [editModalOpen, setEditModalOpen] = useState<boolean>(false);
+  const [productToEdit, setProductToEdit] = useState<Product>();
+  const [loadingEditModal, setLoadingEditModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    getProducts();
+  }, []);
+
+  const getProducts = async () => {
+    setLoading(true);
+    setProducts(await api.getProducts());
+    setCategories(await api.getCategories());
+    setLoading(false);
+  };
+
+  // Delete product
+
+  // function to open modal
+  const handleDeleteProduct = (product: Product) => {
+    setProductToDelete(product);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (productToDelete) {
+      setLoadingDelete(true);
+      await api.deleteProduct(productToDelete.id);
+      setLoadingDelete(false);
+      setShowDeleteDialog(false);
+      await getProducts();
+    }
+  };
+
+  // New and Edit product
+  const handleNewProduct = () => {
+    setProductToEdit(undefined);
+    setEditModalOpen(true);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setProductToEdit(product);
+    setEditModalOpen(true);
+  };
+
+  const handleSaveEditModal = async (event: FormEvent<HTMLFormElement>) => {
+    // form data = é melhor para enviar imagens e textos juntos;
+    let form = new FormData(event.currentTarget);
+
+    setLoadingEditModal(true);
+
+    if (productToEdit) {
+      // form.append = para adicionar o ID do produto para Update
+      form.append("id", productToEdit.id.toString());
+      await api.updateProduct(form);
+    } else {
+      await api.createProduct(form);
+    }
+    setLoadingEditModal(false);
+    setEditModalOpen(false);
+
+    await getProducts();
+  };
 
   return (
     <>
@@ -55,11 +134,62 @@ const Page = () => {
               <TableCell sx={{ display: { xs: "none", md: "table-cell" } }}>
                 Category
               </TableCell>
-              <TableCell sx={{ xs: 50, md: 130 }}>Actions</TableCell>
+              <TableCell sx={{ width: { xs: 50, md: 130 } }}>Actions</TableCell>
             </TableRow>
           </TableHead>
-          <TableBody></TableBody>
+          <TableBody>
+            {loading && (
+              <>
+                <ProductTableSkeleton />
+                <ProductTableSkeleton />
+                <ProductTableSkeleton />
+              </>
+            )}
+            {!loading &&
+              products.map((itemMap, index) => (
+                <ProductTableItem
+                  item={itemMap}
+                  onEdit={handleEditProduct}
+                  onDelete={handleDeleteProduct}
+                />
+              ))}
+          </TableBody>
         </Table>
+
+        <Dialog
+          open={showDeleteDialog}
+          // condição para previnir de fechar o modal ao clicar no botão "sim"
+          onClose={() => (!loadingDelete ? setShowDeleteDialog(false) : null)}
+        >
+          <DialogTitle>
+            Are you sure that you want to delete this product?
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              It's not possible to go back after this action
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              disabled={loadingDelete}
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              No
+            </Button>
+            <Button disabled={loadingDelete} onClick={handleConfirmDelete}>
+              Yes
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <ProductEditModal
+          openModal={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          onSave={handleSaveEditModal}
+          disabled={loadingEditModal}
+          product={productToEdit}
+          categories={categories}
+        />
       </Box>
     </>
   );

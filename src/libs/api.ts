@@ -1,3 +1,4 @@
+import { Catergory } from "@/types/Category";
 import { Order, OrderStatus } from "@/types/Order";
 import { Product } from "@/types/Product";
 
@@ -109,5 +110,60 @@ export const api = {
 
   changeOrderStatus: async (id: number, newStatus: OrderStatus) => {
     return true;
+  },
+
+  getCategories: async (): Promise<Catergory[]> => {
+    const list: Catergory[] = [
+      { id: 99, name: "Burgers" },
+      { id: 98, name: "Sodas" },
+      { id: 97, name: "Candies" },
+    ];
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(list);
+      }, 200);
+    });
+  },
+
+  getProducts: async (): Promise<Product[]> => {
+    const list: Product[] = [
+      { ...tempProduct, id: 123 },
+      { ...tempProduct, id: 124 },
+      { ...tempProduct, id: 125 },
+      { ...tempProduct, id: 126 },
+      { ...tempProduct, id: 127 },
+      { ...tempProduct, id: 128 },
+      { ...tempProduct, id: 129 },
+      { ...tempProduct, id: 130 },
+    ];
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(list);
+      }, 500);
+    });
+  },
+
+  deleteProduct: async (id: number): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true);
+      }, 1000);
+    });
+  },
+
+  createProduct: async (form: FormData) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true);
+      }, 1000);
+    });
+  },
+
+  updateProduct: async (form: FormData) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true);
+      }, 1000);
+    });
   },
 };
